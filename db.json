@@ -1,0 +1,20 @@
+[
+  {
+    "firstName": "Mahesh",
+    "lastName": "Contactone",
+    "phoneNo": "8565824887",
+    "companyName": "MDM"
+  },
+  {
+    "firstName": "Anugrah",
+    "lastName": "Contacttwo",
+    "phoneNo": "9234611234",
+    "companyName": "AAA"
+  },
+  {
+    "firstName": "SomeNew",
+    "lastName": "Contactthree",
+    "phoneNo": "877665544",
+    "companyName": "Zoho Contact group"
+  }
+]
