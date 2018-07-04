@@ -7,7 +7,6 @@ func oldcontactfetchfromgroup1(fetchedPeopleData:[Contact]){ // inside this we w
         for i in core!{
             print("CDdata  ",i.uid!)
         }
-        hjgehrfhk
         //new people DON'T DELETE VARAIABLE
         var newPeopleData = fetchedPeopleData
         //data DON'T DELETE VARAIABLE
