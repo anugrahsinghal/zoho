@@ -1,7 +1,5 @@
-func oldcontactfetchfromgroup1(fetchedPeopleData:[Contact]){ // inside this we will pass the new data fetched
-        //        CoreDataHandler.cleanDelete()
-        //        GroupCoreDataHandler.cleanDelete()
-        
+func oldcontactfetchfromgroup(fetchedPeopleData:[Contact]){ // inside this we will pass the new data fetched
+        //CoreDataHandler.cleanDelete()
         let core = CoreDataHandler.fetchObject()
         print(core?.count as Any)
         for i in core!{
@@ -14,7 +12,6 @@ func oldcontactfetchfromgroup1(fetchedPeopleData:[Contact]){ // inside this we w
         var allGroup :[String] = []
         
         for oldg in oldGroups!{
-            print(oldg.groupName as Any,oldg.guid as Any)
             if(allGroup.contains(oldg.groupName!)==false){
                 allGroup.append(oldg.groupName!)
             }
@@ -25,33 +22,15 @@ func oldcontactfetchfromgroup1(fetchedPeopleData:[Contact]){ // inside this we w
             }
         }
         
-        var groupsToDelete :[String] = []
-        //        var oldgnam:[String] = []
-        var flag = 0
-        for oldg in oldGroups!{
-            flag=0
-            for data in newPeopleData {
-                if(oldg.groupName == data.groupName){
-                    flag=1
-                    break
-                }
-            }
-            if(flag==0){
-                groupsToDelete.append(oldg.groupName!)
-            }
-        }
-        
-        print("Groups to delete ",groupsToDelete)
-        
         var newGroupNames:[String] = []
         //var oldContacts:[CNMutableContact] = []
         var oldContacts1:[Peoplenew] = []
         let groups :[CNGroup] = try! store.groups(matching: nil)
-        for data in allGroup{
-            let filteredGroups = groups.filter { $0.name == data }
+        for data in newPeopleData{
+            let filteredGroups = groups.filter { $0.name == data.groupName }
             guard let workGroup = filteredGroups.first else {
                 print("No Work group")
-                newGroupNames.append(data)
+                newGroupNames.append(data.groupName!)
                 return
             }
             let predicate = CNContact.predicateForContactsInGroup(withIdentifier: workGroup.identifier)
@@ -68,23 +47,44 @@ func oldcontactfetchfromgroup1(fetchedPeopleData:[Contact]){ // inside this we w
         for newGroup in newGroupNames{
             addNewGroup(name: newGroup)
         }
+        //        var oldGroupList :[String] = []
+        //        for oldGroups in groups{
+        //            oldGroupList.append(oldGroups.name)
+        //        }
         
         //A Dictionary/Map FOR OLD NAMES
-        var oldContactDictionary = [String:Int]()
+        var oldContactsProtocol = [String:Int]()
         for (indexold,oldContact) in oldContacts1.enumerated(){
-            oldContactDictionary[oldContact.firstName+oldContact.lastName]=indexold
+            oldContactsProtocol[oldContact.firstName+oldContact.lastName]=indexold
         }
         
         
         for (indexnew,newPerson) in newPeopleData.enumerated() {
-            if(oldContactDictionary.keys.contains(newPerson.firstName!+newPerson.lastName!)){
-                let indexold = oldContactDictionary[newPerson.firstName!+newPerson.lastName!]
+            if(oldContactsProtocol.keys.contains(newPerson.firstName!+newPerson.lastName!)){
+                let indexold = oldContactsProtocol[newPerson.firstName!+newPerson.lastName!]
                 oldContacts1[indexold!].found = "YES"
                 newPeopleData[indexnew].found = "YES"
                 let oldContact = oldContacts1[indexold!]
-                if(oldContact.phoneNo != newPerson.phoneNumbers?.main){
+                if(oldContact.phoneNo !=  newPerson.phoneNumbers?.main){
                     deleteContactbyuid(data: oldContact.uid)
                     createContact(creationData: newPerson)
+                    break
+                }
+            }
+        }
+        
+        
+        //TODO Macthing new people data with old people data
+        for (indexnew,newPerson) in newPeopleData.enumerated() {
+            for (indexold,oldContact) in oldContacts1.enumerated(){
+                if(oldContact.firstName == newPerson.firstName && oldContact.lastName == newPerson.lastName){
+                    oldContacts1[indexold].found = "YES"
+                    newPeopleData[indexnew].found = "YES"
+                    if(oldContact.phoneNo != newPerson.phoneNumbers?.main){
+                        deleteContactbyuid(data: oldContact.uid)
+                        createContact(creationData: newPerson)
+                        break
+                    }//checking chnage in data
                 }
             }
         }
@@ -99,7 +99,7 @@ func oldcontactfetchfromgroup1(fetchedPeopleData:[Contact]){ // inside this we w
         
         for peopletoadd in newPeopleData{
             if(peopletoadd.found == "NO"){
-                print("WE are adding a person",peopletoadd.firstName as Any,peopletoadd.found as Any)
+                print("WE are adding a person",peopletoadd.firstName!,peopletoadd.found as Any)
                 createContact(creationData: peopletoadd)
             }
         }
@@ -110,9 +110,4 @@ func oldcontactfetchfromgroup1(fetchedPeopleData:[Contact]){ // inside this we w
                 deleteContactbyuid(data: peopletoremove.uid)
             }
         }
-        
-        for deleteGroups in groupsToDelete{
-            removeGroup(groupName: deleteGroups)
-        }
-        
     }
